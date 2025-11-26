@@ -57,8 +57,36 @@ public static void afterInsert(List<Lead> newLeads) {
             tasksToCreate.add(newTask);
         }
     }
-    // Bulkification: DML operation fora do loop
-    if (!tasksToCreate.isEmpty()) {
-        insert tasksToCreate;
+    // Bulkification: DML operation fora do loop 
+
+```
+
+### Test Driven Development (Unit Tests)
+Garantia de qualidade cobrindo cenários de sucesso e erro.
+
+```Java
+
+@isTest
+static void testLeadValidation() {
+    Lead leadSemRenda = new Lead(LastName = 'Teste', Company = 'Empresa');
+    
+    try {
+        insert leadSemRenda;
+    } catch (Exception e) {
+        Boolean expectedError = e.getMessage().contains('Renda Mensal é obrigatório');
+        System.assert(expectedError, 'O sistema barrou corretamente a falta de dados.');
     }
 }
+    if (!tasksToCreate.isEmpty()) {
+        insert tasksToCreate;
+```
+### Impacto Esperado
+* 100% de conformidade nos dados de renda de novos Leads.
+* Redução do tempo de resposta para clientes VIP (Hot Leads) devido à criação automática de tarefas.
+* Código escalável pronto para suportar cargas de dados em massa (Data Loader) sem atingir Governor Limits.
+
+
+### 👨‍💻 Autor
+**Lucas Mori**
+Estudante de Desenvolvimento de Sistemas & Salesforce Enthusiast.
+
