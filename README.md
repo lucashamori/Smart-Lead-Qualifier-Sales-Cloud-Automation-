@@ -57,7 +57,10 @@ public static void afterInsert(List<Lead> newLeads) {
             tasksToCreate.add(newTask);
         }
     }
-    // Bulkification: DML operation fora do loop 
+    // Bulkification: DML operation fora do loop
+    if (!tasksToCreate.isEmpty()) {
+            insert tasksToCreate;
+        }
 
 ```
 
@@ -67,18 +70,48 @@ Garantia de qualidade cobrindo cenários de sucesso e erro.
 ```Java
 
 @isTest
-static void testLeadValidation() {
-    Lead leadSemRenda = new Lead(LastName = 'Teste', Company = 'Empresa');
-    
-    try {
-        insert leadSemRenda;
-    } catch (Exception e) {
-        Boolean expectedError = e.getMessage().contains('Renda Mensal é obrigatório');
-        System.assert(expectedError, 'O sistema barrou corretamente a falta de dados.');
+public class LeadTriggerTest {
+
+    // Cenário 1: Inserir Lead com Renda Alta (Deve ficar Hot e criar Tarefa)
+    @isTest
+    static void testLeadHot() {
+        Lead leadVip = new Lead();
+        leadVip.LastName = 'Teste VIP';
+        leadVip.Company = 'Empresa Teste';
+        leadVip.Renda_Mensal__c = 15000; // Maior que 10k
+        
+        Test.startTest();
+        insert leadVip;
+        Test.stopTest();
+        
+        // Verificações (Asserts)
+        Lead insertedLead = [SELECT Rating FROM Lead WHERE Id = :leadVip.Id];
+        System.assertEquals('Hot', insertedLead.Rating, 'O Lead deveria ser classificado como Hot');
+        
+        // Verifica se a tarefa foi criada
+        List<Task> tasks = [SELECT Subject FROM Task WHERE WhoId = :leadVip.Id];
+        System.assertEquals(1, tasks.size(), 'Deveria ter sido criada 1 tarefa');
+    }
+
+    // Cenário 2: Tentar inserir sem Renda (Deve dar erro)
+    @isTest
+    static void testLeadValidation() {
+        Lead leadSemRenda = new Lead();
+        leadSemRenda.LastName = 'Teste Erro';
+        leadSemRenda.Company = 'Empresa Erro';
+        // Não preenchemos a renda
+        
+        Test.startTest();
+        try {
+            insert leadSemRenda;
+        } catch (Exception e) {
+            // Verifica se a mensagem de erro é a que definimos
+            Boolean expectedExceptionThrown = e.getMessage().contains('O campo Renda Mensal é obrigatório');
+            System.assert(expectedExceptionThrown, 'Deveria ter lançado o erro de validação');
+        }
+        Test.stopTest();
     }
 }
-    if (!tasksToCreate.isEmpty()) {
-        insert tasksToCreate;
 ```
 ### Impacto Esperado
 * 100% de conformidade nos dados de renda de novos Leads.
