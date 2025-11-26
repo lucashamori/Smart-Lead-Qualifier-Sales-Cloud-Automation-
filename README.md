@@ -1,29 +1,49 @@
-# 🚀 Smart Lead Qualifier (Sales Cloud Automation)
+# 🚀 Smart Lead Qualifier: Automação e Qualidade de Dados no Sales Cloud
 
-> **Foco:** Backend Automation & Data Integrity
+> **Categoria:** Desenvolvimento Backend (Apex)
+> **Nível:** Junior/Pleno
+> **Foco:** Sales Cloud, Data Quality, Trigger Framework, Bulkification
 
-Este projeto implementa uma automação robusta de backend para o ecossistema **Salesforce Sales Cloud**. O objetivo é eliminar a entrada de dados inconsistentes (Data Quality) e automatizar a priorização de Leads para a equipe comercial, utilizando Apex Triggers seguindo as melhores práticas de Enterprise Design Patterns.
+## 📖 Visão Geral do Projeto
+Este projeto simula um cenário real de uma **Fintech** ou **Imobiliária** que utiliza o Salesforce Sales Cloud. O objetivo foi criar uma "barreira de qualidade" na entrada de novos Leads e automatizar a distribuição de trabalho para a equipe comercial, eliminando a triagem manual.
 
----
-
-## 💼 Cenário de Negócio
-Uma empresa do setor financeiro enfrentava dois problemas críticos:
-1.  **Dados Sujos:** Criação de Leads sem informações financeiras essenciais para a análise de crédito.
-2.  **Lead Time:** Vendedores demoravam para identificar e contatar Leads de alto potencial ("Hot Leads"), perdendo oportunidades de venda.
-
-**Solução:** Desenvolvi uma automação que intercepta a criação do Lead, valida obrigatoriedade de campos condicionalmente, classifica o cliente automaticamente baseado na renda e agenda tarefas de follow-up para os vendedores.
+O projeto foi construído seguindo as melhores práticas de desenvolvimento Salesforce (Enterprise Patterns), garantindo que a solução seja escalável, testável e respeite os limites de governança da plataforma.
 
 ---
 
-## 🛠️ Stack Tecnológico & Conceitos Aplicados
+## 🏢 Cenário de Negócio (O Problema)
+A equipe de vendas relatou três problemas principais:
+1.  **Dados Incompletos:** Muitos Leads eram cadastrados sem informar a renda mensal, o que impedia a análise de crédito.
+2.  **Perda de Timing:** Leads de alto potencial ("Hot Leads") entravam no sistema, mas os vendedores demoravam dias para perceber e ligar.
+3.  **Processo Manual:** O gerente de vendas precisava verificar lead por lead para definir a prioridade.
 
-* **Salesforce Sales Cloud** (Objeto Lead & Task)
-* **Apex Triggers** (Eventos `before insert`, `after insert`)
-* **Trigger Handler Pattern** (Separação lógica para escalabilidade)
-* **Apex Unit Tests** (100% de cobertura de código com Asserts positivos/negativos)
-* **Bulkification** (Código preparado para grandes volumes de dados/Data Loader)
-* **Data Integrity** (Validação via `addError`)
+**A Solução Proposta:**
+Desenvolver uma automação que:
+1.  **Bloqueie** a criação de Leads sem renda informada.
+2.  **Classifique** automaticamente o Lead como "Hot" se a renda for superior a R$ 10.000,00.
+3.  **Crie uma Tarefa** urgente para o vendedor automaticamente assim que um Lead "Hot" for detectado.
 
+---
+
+## 🛠️ Passo a Passo da Implementação
+
+Abaixo, detalho o processo completo de construção, desde a configuração na Org até o deploy do código.
+
+### 1. Modelagem de Dados (Object Manager)
+Antes de iniciar o código, foi necessário preparar o objeto `Lead` para receber os dados financeiros.
+
+* **Ação:** Criação de Campo Customizado.
+* **Local:** Setup > Object Manager > Lead > Fields & Relationships.
+* **Configuração do Campo:**
+    * **Label:** `Renda Mensal`
+    * **API Name:** `Renda_Mensal__c`
+    * **Type:** `Currency` (16, 2)
+    * **Justificativa:** Utilizei o tipo Currency para garantir a formatação correta de moeda e facilitar cálculos futuros.
+
+### 2. Arquitetura de Código (Trigger Handler Pattern)
+Para evitar o anti-padrão de escrever lógica complexa dentro do arquivo da Trigger, adotei o **Handler Pattern**.
+* **Trigger (`LeadTrigger.trigger`):** Funciona apenas como um "semáforo", detectando o evento e chamando a classe responsável.
+* **Classe Handler (`LeadTriggerHandler.cls`):** Contém toda a regra de negócio lógica.
 ---
 
 ## 🏗️ Estrutura da Solução
